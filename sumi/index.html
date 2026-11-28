@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>墨｜アトリエ｜kichi.page</title>
+<meta name="description" content="水墨画の展示室。絵の中に入り、その場の音を聴きながら、しばらく過ごしてください。">
+<meta property="og:image" content="/sumi/img/card.jpg">
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f3efe8; --wall: #fbf9f5; --ink: #2a2622; --sub: #8a8075; --line: #e2dbd0;
+    --dim: #0e0d0c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161413; --wall: #1f1c1a; --ink: #ede6dc; --sub: #a39889; --line: #36302b; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+    line-height: 2;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 56px 16px 96px; }
+
+  .back { font-size: 13px; color: var(--sub); text-decoration: none; letter-spacing: .1em; }
+  .back:hover { color: var(--ink); }
+  header { margin-top: 40px; text-align: center; }
+  .eyebrow { font-size: 12px; letter-spacing: .5em; color: var(--sub); }
+  h1 { margin-top: 6px; font-size: 56px; font-weight: 500; line-height: 1.2; }
+  .intro { margin: 28px auto 0; max-width: 30em; font-size: 15px; color: var(--sub); }
+
+  /* 作品 */
+  .work { margin-top: 140px; text-align: center; }
+  .pic { display: block; margin: 0 auto; position: relative; cursor: zoom-in; }
+  .pic img {
+    display: block; width: 100%; height: auto;
+    box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 20px 50px rgba(0,0,0,.14);
+    transition: transform .6s ease, box-shadow .6s ease;
+  }
+  .pic:hover img { transform: translateY(-3px); box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 28px 60px rgba(0,0,0,.18); }
+  .pic:focus-visible { outline: 2px solid var(--sub); outline-offset: 10px; }
+  .tate .pic { width: min(92vw, 460px); }
+  .yoko .pic { width: min(94vw, 1100px); }
+  .listen {
+    position: absolute; right: 12px; bottom: 12px; padding: 4px 12px;
+    font-size: 12px; letter-spacing: .15em; color: #fff; background: rgba(20,18,16,.55);
+    opacity: 0; transition: opacity .4s;
+  }
+  .pic:hover .listen, .pic:focus-visible .listen { opacity: 1; }
+  @media (hover: none) { .listen { opacity: .85; } }
+
+  .work h2 { margin-top: 44px; font-size: 28px; font-weight: 500; letter-spacing: .25em; padding-left: .25em; }
+  .desc { margin: 18px auto 0; max-width: 27em; text-align: left; font-size: 16px; line-height: 2.2; }
+  .sound { margin-top: 14px; font-size: 12px; color: var(--sub); letter-spacing: .1em; }
+
+  footer { margin-top: 160px; text-align: center; font-size: 12px; color: var(--sub); line-height: 2; }
+  footer a { color: inherit; }
+
+  /* 拡大して入り込む */
+  .viewer { position: fixed; inset: 0; z-index: 10; background: var(--dim); opacity: 0; transition: opacity .7s ease; }
+  .viewer.on { opacity: 1; }
+  .viewer[hidden] { display: none; }
+  .v-scroll { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .v-scroll img { display: block; margin: 0 auto; max-width: none; }
+  .v-bar {
+    position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px calc(12px) 18px; color: #e9e2d6; pointer-events: none;
+    background: linear-gradient(rgba(14,13,12,.7), rgba(14,13,12,0));
+  }
+  .v-bar b { font-weight: 500; letter-spacing: .25em; font-size: 15px; }
+  .v-bar .sp { flex: 1; }
+  .v-bar button { pointer-events: auto; padding: 6px 12px; font-size: 13px; color: #e9e2d6; border: 1px solid rgba(233,226,214,.35); letter-spacing: .1em; }
+  .v-bar button:hover { border-color: #e9e2d6; }
+  .hint {
+    position: absolute; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    padding: 6px 16px; font-size: 13px; letter-spacing: .15em; color: #e9e2d6; background: rgba(14,13,12,.55);
+    pointer-events: none; opacity: 0; transition: opacity 1.2s;
+    white-space: nowrap;
+  }
+  .hint.on { opacity: 1; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 44px; }
+    .work { margin-top: 110px; }
+    .desc { font-size: 15px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .pic img, .viewer { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← アトリエ</a>
+
+  <header>
+    <p class="eyebrow">SUMI</p>
+    <h1>墨</h1>
+    <p class="intro">絵の前で立ち止まって、中に入ってみてください。<br>絵を押すと大きく広がり、その場所の音が聞こえてきます。</p>
+  </header>
+
+  <article class="work tate" id="bakusei">
+    <button class="pic" type="button" data-id="bakusei" aria-label="瀑声を大きく見る（音が流れます）">
+      <img src="img/bakusei.jpg" width="1200" height="3000" alt="切り立った崖のあいだを、一筋の滝が落ちる。滝つぼの岩に、人がひとり座って見上げている。" loading="lazy" decoding="async">
+      <span class="listen">押して、聴く</span>
+    </button>
+    <h2>瀑声</h2>
+    <p class="desc">近づくほどに、音が世界を満たしていく。話し声も、自分の考えさえも、水の轟きにのみこまれる。頬に細かなしぶきが当たり、濡れた岩はひやりとして、かすかに鉄の匂いがする。岩に腰をおろして見上げると、一筋の白が、空の高みから途切れることなく落ちてくる。</p>
+    <p class="sound">音　滝の轟き、しぶき</p>
+  </article>
+
+  <article class="work tate" id="yamadera">
+    <button class="pic" type="button" data-id="yamadera" aria-label="霧の山寺を大きく見る（音が流れます）">
+      <img src="img/yamadera.jpg" width="1200" height="3000" alt="谷川の橋を旅人が渡る。山道はつづら折りに霧の中へ消え、上の山腹に寺と塔が見える。" loading="lazy" decoding="async">
+      <span class="listen">押して、聴く</span>
+    </button>
+    <h2>霧の山寺</h2>
+    <p class="desc">橋板が、足の下でかすかにきしむ。谷川の水は、指を入れればしびれるほど冷たい。苔と湿った土の匂い。見上げた道は、つづら折りに霧の中へ消えていく。どれほど登ったのか分からなくなったころ、白い闇の奥から、鐘がひとつ。その余韻が消えるまで、足を止めて待つ。</p>
+    <p class="sound">音　谷川のせせらぎ、霧の奥の鐘</p>
+  </article>
+
+  <article class="work yoko" id="shorai">
+    <button class="pic" type="button" data-id="shorai" aria-label="松籟を大きく見る（音が流れます）">
+      <img src="img/shorai.jpg" width="3000" height="1250" alt="崖の上から老松が虚空へ枝を張り出し、その下の東屋に人が座っている。右には霧と遠い山並み。" loading="lazy" decoding="async">
+      <span class="listen">押して、聴く</span>
+    </button>
+    <h2>松籟</h2>
+    <p class="desc">崖の上の東屋に、風が渡ってくる。まず遠くの谷がざわめき、それから頭上の松が、寄せては返す波のような音を立てる。松脂の香りが、ふっと鼻をかすめる。眼下は一面の霧。その向こうに、遠い山並みが浮かんでは沈む。いつまで座っていても、誰にも呼ばれない午後。</p>
+    <p class="sound">音　松の梢を渡る風</p>
+  </article>
+
+  <article class="work yoko" id="kanko">
+    <button class="pic" type="button" data-id="kanko" aria-label="寒江を大きく見る（音が流れます）">
+      <img src="img/kanko.jpg" width="3000" height="1250" alt="一面の白の中に、小舟がひとつ。蓑笠の釣り人が糸を垂れている。遠くに雪の山、手前に枯れ木と葦。" loading="lazy" decoding="async">
+      <span class="listen">押して、聴く</span>
+    </button>
+    <h2>寒江</h2>
+    <p class="desc">音がない。雪がすべてを吸いこんでしまったように。吐く息だけが白く、すぐに消える。舟べりを打つ小さな水音と、竿を握る指先のしびれ。岸も、空も、川の向こうも、白にとけて境がない。釣れるかどうかは、もう、どうでもいい。</p>
+    <p class="sound">音　かすかな風、舟べりの水音</p>
+  </article>
+
+  <footer>
+    絵も音も、このページのためにプログラムで一から描き、つくったものです。<br>
+    音はイヤホンで聴くと、より深く入り込めます。<br>
+    <a href="/">アトリエにもどる</a>
+  </footer>
+</div>
+
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="vTitle">
+  <div class="v-scroll" id="vScroll"><img id="vImg" alt=""></div>
+  <div class="v-bar">
+    <b id="vTitle"></b>
+    <span class="sp"></span>
+    <button type="button" id="vSound">音を消す</button>
+    <button type="button" id="vClose" aria-label="閉じる">閉じる ×</button>
+  </div>
+  <div class="hint" id="vHint"></div>
+</div>
+
+<script>
+"use strict";
+/* ---------------------------------------------------------
+   作品ごとの設定
+   entry：入り口（人物）のある位置。拡大したとき、まずそこを見せる（0〜1）
+   --------------------------------------------------------- */
+const WORKS = {
+  bakusei:  { title: "瀑声",     entry: 1.0,  hint: "下の人と一緒に、上へ見上げていく" },
+  yamadera: { title: "霧の山寺", entry: 1.0,  hint: "橋の旅人から、道をたどって上へ" },
+  shorai:   { title: "松籟",     entry: 0.25, hint: "" },
+  kanko:    { title: "寒江",     entry: 0.46, hint: "" },
+};
+
+/* ---------------------------------------------------------
+   音：録音は使わず、ブラウザの中で自然の音を合成する
+   --------------------------------------------------------- */
+const Sound = (() => {
+  let ctx = null, master = null, reverb = null, scene = null;
+  const bufs = {};
+  let enabled = true;
+  try { enabled = localStorage.getItem("sumi:sound") !== "off"; } catch {}
+
+  function init() {
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return true; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    // 残響：だんだん小さくなる雑音を、響きのもとにする
+    reverb = ctx.createConvolver();
+    const len = Math.floor(ctx.sampleRate * 4.5), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = ir.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+    }
+    reverb.buffer = ir;
+    reverb.connect(master);
+    return true;
+  }
+
+  // 雑音のもと（白・桃・茶）。左右で別の揺らぎにして広がりを出す
+  function noise(kind) {
+    if (bufs[kind]) return bufs[kind];
+    const len = ctx.sampleRate * 8, b = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = b.getChannelData(ch);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0;
+      for (let i = 0; i < len; i++) {
+        const w = Math.random() * 2 - 1;
+        if (kind === "white") d[i] = w * 0.5;
+        else if (kind === "pink") {
+          b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+          b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+          d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926;
+        } else { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+      }
+    }
+    return (bufs[kind] = b);
+  }
+
+  // 場面ごとの音の部品を作り、まとめて止められるようにする
+  function makeScene() {
+    const out = ctx.createGain(); out.gain.value = 0; out.connect(master);
+    const sources = [], timers = [];
+    const src = (kind, rate = 1) => {
+      const s = ctx.createBufferSource(); s.buffer = noise(kind); s.loop = true; s.playbackRate.value = rate;
+      s.loopStart = Math.random() * 4; s.start(0, Math.random() * 7); sources.push(s); return s;
+    };
+    const filt = (type, f, q = 0.7) => { const n = ctx.createBiquadFilter(); n.type = type; n.frequency.value = f; n.Q.value = q; return n; };
+    const gain = (v) => { const g = ctx.createGain(); g.gain.value = v; return g; };
+    const chain = (...nodes) => { for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]); return nodes[nodes.length - 1]; };
+    const every = (fn, min, max, delay = 0) => {
+      const tick = () => { fn(); timers.push(setTimeout(tick, (min + Math.random() * (max - min)) * 1000)); };
+      timers.push(setTimeout(tick, delay * 1000));
+    };
+    // ゆっくり揺れる値（風の強弱など）
+    const drift = (param, lo, hi, tMin, tMax, tc = 1.2) =>
+      every(() => param.setTargetAtTime(lo + Math.random() * (hi - lo), ctx.currentTime, tc), tMin, tMax);
+    // 一度きりの音源は、鳴り終わったら止めて手放す
+    const once = (s, at) => {
+      try { s.stop(at); } catch {}
+      s.onended = () => { const i = sources.indexOf(s); if (i >= 0) sources.splice(i, 1); try { s.disconnect(); } catch {} };
+    };
+    return {
+      out, src, filt, gain, chain, every, drift, once,
+      fadeIn(sec = 2.5, level = 1) { out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(level, ctx.currentTime + sec); },
+      stop(sec = 1.4) {
+        timers.forEach(clearTimeout); timers.length = 0;
+        const t = ctx.currentTime;
+        out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + sec);
+        sources.forEach((s) => { try { s.stop(t + sec + 0.1); } catch {} });
+        setTimeout(() => out.disconnect(), (sec + 0.3) * 1000);
+      },
+    };
+  }
+
+  // 梵鐘：倍音がずれて重なり、うなりながら長く響く
+  function bell(sc, level = 0.32) {
+    const t = ctx.currentTime + 0.05;
+    const base = 92 + Math.random() * 4;
+    const parts = [[0.5, 0.35, 14], [1, 1, 11], [1.004, 0.6, 11], [2.02, 0.45, 7], [2.76, 0.32, 5.5], [3.01, 0.22, 4.5], [4.1, 0.12, 3], [5.4, 0.08, 2.2]];
+    const bus = sc.gain(level);
+    const lp = sc.filt("lowpass", 1800, 0.5);
+    bus.connect(lp); lp.connect(sc.out);
+    const wet = sc.gain(0.9); lp.connect(wet); wet.connect(reverb);
+    for (const [m, a, dec] of parts) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = base * m;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a * 0.3, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+      o.connect(g); g.connect(bus); o.start(t); o.stop(t + dec + 0.1);
+    }
+    // 撞木（しゅもく）が当たる、こもった音
+    const thud = sc.src("brown"); const tg = sc.gain(0);
+    sc.chain(thud, sc.filt("lowpass", 260, 0.8), tg, bus);
+    tg.gain.setValueAtTime(0, t); tg.gain.linearRampToValueAtTime(0.9, t + 0.01); tg.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    sc.once(thud, t + 0.5);
+  }
+
+  const SCENES = {
+    // 滝：低い轟き＋中域の水の砕ける音＋高いしぶき
+    bakusei(sc) {
+      sc.chain(sc.src("brown"), sc.filt("lowpass", 700, 0.5), sc.gain(0.55), sc.out);
+      const mid = sc.gain(0.22); sc.chain(sc.src("pink"), sc.filt("bandpass", 1400, 0.45), mid, sc.out);
+      sc.chain(sc.src("white"), sc.filt("highpass", 4500, 0.5), sc.gain(0.05), sc.out);
+      sc.drift(mid.gain, 0.16, 0.27, 1.5, 3.5, 0.8);
+      sc.fadeIn(3, 0.8);
+    },
+    // 山寺：谷川のせせらぎ＋かすかな風＋霧の奥から鐘
+    yamadera(sc) {
+      sc.chain(sc.src("brown"), sc.filt("lowpass", 520, 0.5), sc.gain(0.12), sc.out);
+      for (let i = 0; i < 4; i++) {
+        const bp = sc.filt("bandpass", 900, 3 + Math.random() * 3), g = sc.gain(0.07);
+        sc.chain(sc.src("pink", 0.9 + Math.random() * 0.2), bp, g, sc.out);
+        sc.every(() => {
+          const t = ctx.currentTime;
+          bp.frequency.setTargetAtTime(380 + Math.random() * 2200, t, 0.04);
+          g.gain.setTargetAtTime(0.02 + Math.random() * 0.12, t, 0.05);
+        }, 0.07, 0.22);
+      }
+      const wind = sc.gain(0.03); sc.chain(sc.src("pink"), sc.filt("bandpass", 380, 0.6), wind, sc.out);
+      sc.drift(wind.gain, 0.0, 0.05, 3, 6, 2.5);
+      // 最初の鐘は少し待ってから。そのあとは17〜24秒おきに
+      sc.every(() => bell(sc), 17, 24, 3.5);
+      sc.fadeIn(3, 1);
+    },
+    // 松籟：寄せては返す突風。強いときほど音が高く明るくなる
+    shorai(sc) {
+      const body = sc.gain(0.05), bp = sc.filt("bandpass", 800, 0.55);
+      sc.chain(sc.src("pink"), bp, body, sc.out);
+      const hiss = sc.gain(0.01), hp = sc.filt("highpass", 3200, 0.5);
+      sc.chain(sc.src("white"), hp, hiss, sc.out);
+      sc.chain(sc.src("brown"), sc.filt("lowpass", 180, 0.5), sc.gain(0.12), sc.out);
+      sc.every(() => {
+        const t = ctx.currentTime, s = Math.random();
+        const level = 0.07 + Math.pow(s, 1.3) * 0.75;
+        const tc = 1.0 + Math.random() * 1.8;
+        body.gain.setTargetAtTime(level, t, tc);
+        hiss.gain.setTargetAtTime(level * 0.16, t, tc);
+        bp.frequency.setTargetAtTime(520 + s * 900, t, tc);
+      }, 2.2, 4.5);
+      sc.fadeIn(3, 1);
+    },
+    // 寒江：ほとんど無音。かすかな風と、ときどき舟べりを打つ水
+    kanko(sc) {
+      const wind = sc.gain(0.03); sc.chain(sc.src("pink"), sc.filt("bandpass", 260, 0.7), wind, sc.out);
+      sc.drift(wind.gain, 0.012, 0.06, 4, 8, 3);
+      const lap = () => {
+        const t = ctx.currentTime + 0.02, g = sc.gain(0), f = sc.filt("bandpass", 320 + Math.random() * 260, 1.4);
+        const s1 = sc.src("brown"); sc.chain(s1, f, g, sc.out); sc.once(s1, t + 1.4);
+        const peak = 0.35 + Math.random() * 0.3;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + 0.09); g.gain.exponentialRampToValueAtTime(0.0005, t + 0.7 + Math.random() * 0.5);
+        if (Math.random() < 0.5) {
+          const t2 = t + 0.35 + Math.random() * 0.3, g2 = sc.gain(0), f2 = sc.filt("bandpass", 450, 1.6);
+          const s2 = sc.src("brown"); sc.chain(s2, f2, g2, sc.out); sc.once(s2, t2 + 0.8);
+          g2.gain.setValueAtTime(0, t2); g2.gain.linearRampToValueAtTime(peak * 0.5, t2 + 0.07); g2.gain.exponentialRampToValueAtTime(0.0005, t2 + 0.5);
+        }
+      };
+      sc.every(lap, 3.5, 7.5);
+      sc.fadeIn(4, 1);
+    },
+  };
+
+  return {
+    get enabled() { return enabled; },
+    play(id) {
+      this.stop();
+      if (!enabled || !init()) return;
+      scene = makeScene();
+      SCENES[id](scene);
+    },
+    stop() { if (scene) { scene.stop(); scene = null; } },
+    toggle(id) {
+      enabled = !enabled;
+      try { localStorage.setItem("sumi:sound", enabled ? "on" : "off"); } catch {}
+      if (enabled) this.play(id); else this.stop();
+      return enabled;
+    },
+  };
+})();
+
+/* ---------------------------------------------------------
+   拡大して見る
+   --------------------------------------------------------- */
+const viewer = document.getElementById("viewer");
+const vScroll = document.getElementById("vScroll");
+const vImg = document.getElementById("vImg");
+const vTitle = document.getElementById("vTitle");
+const vSound = document.getElementById("vSound");
+const vHint = document.getElementById("vHint");
+let openId = null, lastFocus = null, hintTimer = 0;
+
+function layout() {
+  if (!openId) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const nw = vImg.naturalWidth || 1, nh = vImg.naturalHeight || 1;
+  if (nh > nw) {
+    // 掛軸：横幅いっぱい（大きくなりすぎない範囲で）にして、縦に巻物を眺める
+    const w = Math.min(vw, 900, nw);
+    vImg.style.width = w + "px"; vImg.style.height = "auto";
+    vImg.style.margin = "0 auto";
+  } else {
+    // 横長：画面に収まれば全体を。スマホの縦持ちでは高さを優先して、横に眺める
+    const fitW = Math.min(vw, nw), fitH = fitW * nh / nw;
+    if (fitH >= vh * 0.55 || vw >= vh) {
+      const s = Math.min(vw / nw, vh / nh);
+      vImg.style.width = Math.round(nw * s) + "px"; vImg.style.height = "auto";
+      vImg.style.margin = Math.max(0, (vh - nh * s) / 2) + "px auto 0";
+    } else {
+      const h = Math.round(vh * 0.86);
+      vImg.style.height = h + "px"; vImg.style.width = "auto";
+      vImg.style.margin = Math.round((vh - h) / 2) + "px 0 0";
+    }
+  }
+}
+
+function jumpToEntry() {
+  const w = WORKS[openId];
+  const maxX = vScroll.scrollWidth - vScroll.clientWidth;
+  const maxY = vScroll.scrollHeight - vScroll.clientHeight;
+  vScroll.scrollTop = maxY * (vImg.naturalHeight > vImg.naturalWidth ? w.entry : 0);
+  vScroll.scrollLeft = vImg.naturalWidth > vImg.naturalHeight ? Math.max(0, Math.min(maxX, vImg.clientWidth * w.entry - vScroll.clientWidth / 2)) : 0;
+}
+
+function open(id, push = true) {
+  const w = WORKS[id];
+  if (!w) return;
+  openId = id;
+  lastFocus = document.activeElement;
+  vTitle.textContent = w.title;
+  vImg.alt = document.querySelector(`[data-id="${id}"] img`).alt;
+  vSound.textContent = Sound.enabled ? "音を消す" : "音を出す";
+  viewer.hidden = false;
+  document.body.style.overflow = "hidden";
+  const ready = () => { layout(); jumpToEntry(); requestAnimationFrame(() => viewer.classList.add("on")); };
+  if (vImg.getAttribute("src") !== `img/${id}.jpg`) { vImg.onload = ready; vImg.src = `img/${id}.jpg`; }
+  else ready();
+  Sound.play(id);
+  clearTimeout(hintTimer);
+  vHint.classList.remove("on");
+  if (w.hint) {
+    vHint.textContent = w.hint;
+    hintTimer = setTimeout(() => { vHint.classList.add("on"); hintTimer = setTimeout(() => vHint.classList.remove("on"), 4200); }, 900);
+  }
+  vClose.focus({ preventScroll: true });
+  if (push) history.pushState({ sumi: id }, "", `#${id}`);
+}
+
+function close(pop = false) {
+  if (!openId) return;
+  Sound.stop();
+  clearTimeout(hintTimer);
+  viewer.classList.remove("on");
+  const was = openId;
+  openId = null;
+  setTimeout(() => { if (!openId) { viewer.hidden = true; } }, 500);
+  document.body.style.overflow = "";
+  if (!pop && history.state && history.state.sumi) history.back();
+  (lastFocus || document.querySelector(`[data-id="${was}"]`))?.focus({ preventScroll: true });
+}
+
+const vClose = document.getElementById("vClose");
+document.querySelectorAll(".pic").forEach((b) => b.addEventListener("click", () => open(b.dataset.id)));
+vClose.addEventListener("click", () => close());
+vSound.addEventListener("click", () => { const on = Sound.toggle(openId); vSound.textContent = on ? "音を消す" : "音を出す"; });
+addEventListener("keydown", (e) => { if (e.key === "Escape" && openId) { e.preventDefault(); close(); } });
+addEventListener("popstate", () => { if (openId) close(true); });
+addEventListener("resize", () => { if (openId) layout(); });
+// 画面を離れたら音を止め、戻ったら再開する
+document.addEventListener("visibilitychange", () => {
+  if (!openId) return;
+  if (document.hidden) Sound.stop(); else Sound.play(openId);
+});
+</script>
+</body>
+</html>

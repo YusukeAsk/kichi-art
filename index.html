@@ -51,6 +51,15 @@
   .frame svg { width: 46%; height: auto; opacity: .55; }
   .piece b { display: block; margin-top: 22px; font-size: 17px; font-weight: 500; letter-spacing: .1em; }
   .piece span { display: block; color: var(--sub); font-size: 13px; }
+  a.piece { color: inherit; text-decoration: none; }
+  a.piece .frame { transition: transform .4s ease, box-shadow .4s ease; }
+  a.piece:hover .frame { transform: translateY(-3px); box-shadow: 0 0 0 7px var(--frame), 0 20px 36px rgba(0,0,0,.18); }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .open {
+    display: inline-block; margin-top: 6px; padding: 0 12px;
+    border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+    font-size: 12px; letter-spacing: .2em;
+  }
   .soon {
     display: inline-block; margin-top: 6px; padding: 0 12px;
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -67,6 +76,14 @@
   </header>
 
   <ul class="gallery">
+    <li>
+      <a class="piece" href="/sumi/">
+        <div class="frame"><img src="/sumi/img/card.jpg" width="480" height="360" alt="水墨画「寒江」の一部。白い広がりに小舟と遠い雪の山。" loading="lazy"></div>
+        <b>墨</b>
+        <span>絵の中に入り、音を聴く。水墨画の展示室</span>
+        <span class="open">ひらく</span>
+      </a>
+    </li>
     <li class="piece">
       <div class="frame" aria-hidden="true">
         <svg viewBox="0 0 100 60" fill="none" stroke="currentColor" stroke-width="2"><path d="M0 40 Q25 20 50 40 T100 40"/><path d="M0 50 Q25 32 50 50 T100 50"/><circle cx="74" cy="16" r="7"/></svg>
