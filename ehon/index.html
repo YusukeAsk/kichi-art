@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>えほん｜アトリエ｜kichi.page</title>
+<meta name="description" content="うりぼう きょうだいの えほん。2〜4さいの子と、ゆびさしで あそびながら よめる えほんです。">
+<meta property="og:image" content="/ehon/card.jpg">
+<link rel="icon" href="data:,">
+<style>
+  @font-face { font-family: "ZenMaru"; src: url("fonts/zenmaru-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "ZenMaru"; src: url("fonts/zenmaru-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+  :root {
+    --bg: #f6efe2; --paper: #fffaf1; --ink: #4a3628; --sub: #8a7462; --line: #e6d8c2;
+    --accent: #e0524a; --blue: #5a8fd0; --green: #6fae5a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "ZenMaru", "Hiragino Maru Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif; font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .hide { display: none !important; }
+
+  /* ===== 本だな ===== */
+  .shelf { max-width: 1080px; margin: 0 auto; padding: 48px 18px 80px; }
+  .back { font-size: 14px; color: var(--sub); text-decoration: none; }
+  .back:hover { color: var(--ink); }
+  .shelf header { margin-top: 32px; text-align: center; }
+  .shelf h1 { font-size: 44px; font-weight: 700; letter-spacing: .2em; padding-left: .2em; }
+  .shelf .lead { margin-top: 12px; color: var(--sub); font-size: 15px; line-height: 1.9; }
+  .books { margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 40px 28px; list-style: none; }
+  .bk { display: block; width: 100%; text-align: center; }
+  .bk .cv { position: relative; display: block; border-radius: 4px 10px 10px 4px; overflow: hidden;
+    box-shadow: -6px 0 0 #d7c4a6 inset, 0 2px 0 rgba(0,0,0,.05), 0 14px 30px rgba(80,50,20,.18);
+    transition: transform .3s ease, box-shadow .3s ease; }
+  .bk .cv::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: linear-gradient(90deg, rgba(0,0,0,.18), rgba(0,0,0,0)); z-index: 1; }
+  .bk img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .bk:hover .cv { transform: translateY(-4px) rotate(-.5deg); box-shadow: -6px 0 0 #d7c4a6 inset, 0 22px 40px rgba(80,50,20,.22); }
+  .bk b { display: block; margin-top: 16px; font-size: 19px; font-weight: 700; }
+  .bk span { display: block; margin-top: 4px; font-size: 13px; color: var(--sub); }
+  .howto { margin: 64px auto 0; max-width: 640px; padding: 22px 26px; background: var(--paper); border: 2px dashed var(--line); border-radius: 18px; font-size: 15px; line-height: 2; }
+  .howto b { font-weight: 700; }
+  .howto .kids { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+  .howto .kids span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+  .foot { margin-top: 48px; text-align: center; font-size: 12px; color: var(--sub); line-height: 2; }
+
+  /* ===== よむ画面 ===== */
+  .reader { position: fixed; inset: 0; z-index: 10; background: var(--bg); display: flex; flex-direction: column; }
+  .r-top { display: flex; align-items: center; gap: 8px; padding: 10px 12px; padding-top: calc(10px + env(safe-area-inset-top)); }
+  .r-top .ttl { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip { padding: 7px 13px; border-radius: 999px; background: var(--paper); border: 2px solid var(--line); font-size: 13px; white-space: nowrap; }
+  .chip.on { border-color: var(--accent); color: var(--accent); }
+  .r-main { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 10px 10px; gap: 14px; }
+  .stage { position: relative; display: flex; align-items: center; gap: 10px; }
+  .pic { position: relative; width: min(94vw, calc((100dvh - 250px) * 4 / 3), 1200px); aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 2px 0 rgba(0,0,0,.04), 0 16px 34px rgba(80,50,20,.16); background: var(--paper); touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .pic img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity .35s ease; }
+  .spot { position: absolute; border-radius: 30%; }
+  .spot:focus-visible { outline: 3px solid var(--accent); }
+  .ring { position: absolute; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 0 4px rgba(224,82,74,.55), 0 0 24px rgba(255,255,255,.9); pointer-events: none; animation: ring .9s ease-out forwards; }
+  @keyframes ring { 0% { transform: scale(.6); opacity: 0; } 30% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+  .bubble { position: absolute; transform: translate(-50%, -100%); padding: 8px 18px; border-radius: 999px; background: #fff; color: var(--ink);
+    font-weight: 700; font-size: clamp(18px, 2.6vw, 28px); white-space: nowrap; pointer-events: none;
+    box-shadow: 0 6px 18px rgba(80,50,20,.2); animation: pop .45s cubic-bezier(.2,1.6,.4,1) both; }
+  .bubble::after { content: ""; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); border: 10px solid transparent; border-top-color: #fff; border-bottom: 0; }
+  .bubble.found { background: var(--accent); color: #fff; }
+  .bubble.found::after { border-top-color: var(--accent); }
+  @keyframes pop { from { transform: translate(-50%, -80%) scale(.5); opacity: 0; } }
+  .nav { width: 54px; height: 54px; flex-shrink: 0; border-radius: 50%; background: var(--paper); border: 2px solid var(--line); font-size: 26px; font-weight: 700; display: grid; place-items: center; }
+  .nav:disabled { opacity: .25; cursor: default; }
+  .nav:not(:disabled):hover { border-color: var(--ink); }
+  .text { width: min(94vw, 1000px); min-height: 92px; text-align: center; font-size: clamp(20px, 2.6vw, 30px); line-height: 1.7; font-weight: 700; letter-spacing: .06em; }
+  .text p + p { margin-top: 2px; }
+  .r-foot { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 0 12px calc(12px + env(safe-area-inset-bottom)); font-size: 13px; color: var(--sub); }
+  .r-foot .navs { display: none; gap: 12px; }
+  .cover-go { margin-top: 10px; padding: 10px 40px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 22px; font-weight: 700; letter-spacing: .1em; box-shadow: 0 8px 20px rgba(160,50,40,.3); }
+  .end { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255,250,241,.9); text-align: center; }
+  .end h2 { font-size: clamp(34px, 5vw, 56px); font-weight: 700; letter-spacing: .2em; }
+  .end p { margin-top: 10px; font-size: clamp(14px, 2vw, 18px); line-height: 1.7; padding: 0 12px; }
+  .end .btns { margin-top: 22px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .end .btns button { padding: 10px 22px; border-radius: 999px; border: 2px solid var(--ink); font-size: 16px; font-weight: 700; background: var(--paper); }
+
+  @media (max-width: 760px) {
+    .stage .nav { display: none; }
+    .r-foot .navs { display: flex; }
+    .pic { width: 96vw; }
+    .shelf h1 { font-size: 36px; }
+    .cover-go { margin-top: 10px; padding: 10px 40px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 22px; font-weight: 700; letter-spacing: .1em; box-shadow: 0 8px 20px rgba(160,50,40,.3); }
+    .end .btns button { padding: 8px 16px; font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ring, .bubble { animation: none; } }
+</style>
+</head>
+<body>
+
+<main class="shelf" id="shelf">
+  <a class="back" href="/">← アトリエ</a>
+  <header>
+    <h1>えほん</h1>
+    <p class="lead">うりぼうの きょうだいと おかあさんの えほんです。<br>えの なかの ものを ゆびで おすと、なまえが でてきます。</p>
+  </header>
+  <ul class="books" id="books"></ul>
+
+  <div class="howto">
+    <b>よみかたの こつ</b><br>
+    ・えを おすと、なまえが でます。「これ なあに？」と いっしょに さがしてみてください。<br>
+    ・どの ページにも、てんとうむしの「ぽっち」が かくれています。<br>
+    ・「よみあげ」を おすと、ぶんと なまえを こえで よみます。
+    <div class="kids"><span style="--c:var(--blue)">ころ（あおい スカーフ）</span><span style="--c:var(--green)">ぽこ（みどりの スカーフ）</span><span style="--c:var(--accent)">ちぃ（あかい リボン）</span></div>
+  </div>
+  <p class="foot">絵も文も、このページのために一から描き、書いたものです。</p>
+</main>
+
+<div class="reader hide" id="reader" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <div class="r-top">
+    <button class="chip" type="button" id="rBack">← ほんだな</button>
+    <div class="ttl" id="rTitle"></div>
+    <button class="chip" type="button" id="rSpeak" aria-pressed="false">よみあげ</button>
+  </div>
+  <div class="r-main">
+    <div class="stage">
+      <button class="nav" type="button" id="prev" aria-label="まえの ページ">‹</button>
+      <div class="pic" id="pic">
+        <img id="img" alt="">
+        <div id="spots"></div>
+        <div class="end hide" id="end">
+          <div>
+            <h2>おしまい</h2>
+            <p id="endFound"></p>
+            <div class="btns"><button type="button" id="again">もう いちど</button><button type="button" id="toShelf">ほかの えほん</button></div>
+          </div>
+        </div>
+      </div>
+      <button class="nav" type="button" id="next" aria-label="つぎの ページ">›</button>
+    </div>
+    <div class="text" id="text" aria-live="polite"></div>
+  </div>
+  <div class="r-foot">
+    <div class="navs"><button class="nav" type="button" id="prev2" aria-label="まえの ページ">‹</button></div>
+    <span id="count"></span>
+    <span id="pocchi"></span>
+    <div class="navs"><button class="nav" type="button" id="next2" aria-label="つぎの ページ">›</button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const BOOKS = [
+  { id: "picnic",  title: "うりぼう きょうだいの ピクニック", note: "おでかけ・ゆびさし" },
+  { id: "ofuro",   title: "ぽかぽか おふろ",                 note: "くらし・おとの ことば" },
+  { id: "oyasumi", title: "おやすみ、もりの みんな",           note: "ねる まえに" },
+];
+const $ = (id) => document.getElementById(id);
+const cache = {};
+async function loadBook(id) {
+  if (!cache[id]) cache[id] = await (await fetch(`books/${id}/book.json`)).json();
+  return cache[id];
+}
+
+// ---------- 本だな ----------
+$("books").innerHTML = BOOKS.map((b) => `
+  <li><button class="bk" type="button" data-id="${b.id}">
+    <span class="cv"><img src="books/${b.id}/p00.jpg" alt="${b.title} の ひょうし" loading="lazy"></span>
+    <b>${b.title}</b><span>${b.note}</span>
+  </button></li>`).join("");
+$("books").querySelectorAll(".bk").forEach((el) => el.addEventListener("click", () => openBook(el.dataset.id, 0)));
+
+// ---------- よみあげ ----------
+const canSpeak = "speechSynthesis" in window;
+let speakOn = false;
+try { speakOn = canSpeak && localStorage.getItem("ehon:speak") === "on"; } catch {}
+if (!canSpeak) $("rSpeak").classList.add("hide");
+function drawSpeak() { $("rSpeak").classList.toggle("on", speakOn); $("rSpeak").setAttribute("aria-pressed", String(speakOn)); $("rSpeak").textContent = speakOn ? "よみあげ：オン" : "よみあげ"; }
+drawSpeak();
+let jaVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith("ja"));
+  jaVoice = vs.find((v) => /kyoko|o-ren|nanami|haruka|google/i.test(v.name)) || vs[0] || null;
+}
+if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text, cancel = true) {
+  if (!speakOn || !text) return;
+  if (cancel) speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/[「」]/g, ""));
+  u.lang = "ja-JP"; u.rate = 0.85; u.pitch = 1.1;
+  if (jaVoice) u.voice = jaVoice;
+  speechSynthesis.speak(u);
+}
+$("rSpeak").addEventListener("click", () => {
+  speakOn = !speakOn;
+  try { localStorage.setItem("ehon:speak", speakOn ? "on" : "off"); } catch {}
+  drawSpeak();
+  if (speakOn) say(currentText()); else speechSynthesis.cancel();
+});
+
+// ---------- よむ ----------
+let book = null, page = 0, found = new Set();
+const total = () => book.pages.length;            // 1〜total がページ、0 が表紙、total+1 が おしまい
+const pageData = () => (page === 0 ? { img: book.cover, text: [], spots: book.cover_spots } : book.pages[page - 1]);
+const currentText = () => (page >= 1 && page <= total() ? book.pages[page - 1].text.filter(Boolean).join("。") : page === 0 ? book.title : "");
+
+async function openBook(id, p = 0, push = true) {
+  book = await loadBook(id);
+  found = new Set();
+  $("reader").classList.remove("hide");
+  document.body.style.overflow = "hidden";
+  $("rTitle").textContent = book.title;
+  if (push) history.pushState({ ehon: id }, "", `#${id}`);
+  go(p, true);
+}
+
+function closeBook(pop = false) {
+  if (canSpeak) speechSynthesis.cancel();
+  $("reader").classList.add("hide");
+  document.body.style.overflow = "";
+  book = null;
+  if (!pop && history.state && history.state.ehon) history.back();
+}
+
+function go(p, first = false) {
+  if (!book) return;
+  page = Math.max(0, Math.min(total() + 1, p));
+  const isEnd = page === total() + 1;
+  $("end").classList.toggle("hide", !isEnd);
+  if (!isEnd) {
+    const d = pageData();
+    const img = $("img");
+    img.style.opacity = first ? 1 : 0;
+    const src = `books/${book.id}/${d.img}`;
+    const show = () => { img.style.opacity = 1; };
+    if (img.getAttribute("src") !== src) { img.onload = show; img.src = src; } else show();
+    img.alt = page === 0 ? `${book.title} の ひょうし` : d.text.join(" ");
+    $("text").innerHTML = page === 0 ? `<p>${book.title}</p><button class="cover-go" type="button" id="coverGo">よむ</button>` : d.text.filter(Boolean).map((t) => `<p>${t}</p>`).join("");
+    drawSpots(d.spots || []);
+    // つぎの絵を先に読んでおく
+    if (page < total()) { const n = new Image(); n.src = `books/${book.id}/${book.pages[page].img}`; }
+  } else {
+    $("text").innerHTML = "";
+    $("spots").innerHTML = "";
+    const n = found.size, all = total() + 1;
+    $("endFound").innerHTML = n ? `ぽっちを ${n}かい みつけたよ！<br>（ぜんぶで ${all}かい かくれていたよ）` : `ぽっちは どの ページにも<br>かくれていたよ。さがしてみてね。`;
+    say("おしまい");
+  }
+  $("count").textContent = page === 0 ? "ひょうし" : isEnd ? "" : `${page} / ${total()}`;
+  $("pocchi").textContent = found.size ? `ぽっち ${found.size}` : "";
+  for (const id of ["prev", "prev2"]) $(id).disabled = page === 0;
+  for (const id of ["next", "next2"]) $(id).disabled = isEnd;
+  if (!isEnd && page > 0) say(currentText());
+}
+
+function drawSpots(spots) {
+  const box = $("spots");
+  box.innerHTML = "";
+  // 小さいものを上に重ねる（大きい範囲の下に隠れないように）
+  [...spots].sort((a, b) => b.w * b.h - a.w * a.h).forEach((s) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "spot";
+    el.style.cssText = `left:${s.x}%;top:${s.y}%;width:${s.w}%;height:${s.h}%`;
+    el.setAttribute("aria-label", s.say);
+    el.addEventListener("click", (e) => { e.stopPropagation(); point(s); });
+    box.appendChild(el);
+  });
+}
+
+let bubbleTimer = 0;
+function point(s) {
+  const pic = $("pic");
+  pic.querySelectorAll(".ring, .bubble").forEach((n) => n.remove());
+  clearTimeout(bubbleTimer);
+  const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
+  const r = Math.max(6, Math.min(30, Math.max(s.w, s.h * 0.75) * 0.6));
+  const ring = document.createElement("div");
+  ring.className = "ring";
+  ring.style.cssText = `left:calc(${cx}% - ${r}%);top:calc(${cy}% - ${r * 4 / 3}%);width:${r * 2}%;height:${r * 8 / 3}%`;
+  pic.appendChild(ring);
+  const isPocchi = s.name === "ぽっち";
+  if (isPocchi) found.add(page);
+  const b = document.createElement("div");
+  b.className = "bubble" + (isPocchi ? " found" : "");
+  b.textContent = isPocchi ? "ぽっち、みーつけた！" : s.name;
+  pic.appendChild(b);
+  // ふきだしが 絵の はしで きれないように、実際の はばで 位置を きめる
+  const W = pic.clientWidth, H = pic.clientHeight, bw = b.offsetWidth, bh = b.offsetHeight;
+  const left = Math.min(W - bw / 2 - 8, Math.max(bw / 2 + 8, (cx / 100) * W));
+  let top = (s.y / 100) * H - 4;
+  if (top - bh < 8) top = ((s.y + s.h) / 100) * H + bh + 14; // 上に 入らなければ 下に
+  b.style.left = `${left}px`;
+  b.style.top = `${Math.min(H - 8, top)}px`;
+  bubbleTimer = setTimeout(() => b.remove(), 2600);
+  say(isPocchi ? "ぽっち、みーつけた" : s.say);
+  $("pocchi").textContent = found.size ? `ぽっち ${found.size}` : "";
+}
+
+for (const id of ["next", "next2"]) $(id).addEventListener("click", () => go(page + 1));
+for (const id of ["prev", "prev2"]) $(id).addEventListener("click", () => go(page - 1));
+$("text").addEventListener("click", (e) => { if (e.target.id === "coverGo") go(1); });
+$("again").addEventListener("click", () => { found = new Set(); go(0); });
+$("toShelf").addEventListener("click", () => closeBook());
+$("rBack").addEventListener("click", () => closeBook());
+addEventListener("keydown", (e) => {
+  if (!book) return;
+  if (e.key === "ArrowRight") go(page + 1);
+  else if (e.key === "ArrowLeft") go(page - 1);
+  else if (e.key === "Escape") closeBook();
+});
+// スワイプでめくる
+let sx = null, sy = 0;
+$("pic").addEventListener("pointerdown", (e) => { sx = e.clientX; sy = e.clientY; });
+$("pic").addEventListener("pointerup", (e) => {
+  if (sx === null) return;
+  const dx = e.clientX - sx, dy = e.clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.4) go(page + (dx < 0 ? 1 : -1));
+});
+addEventListener("popstate", () => { if (book) closeBook(true); else if (location.hash.slice(1)) openFromHash(false); });
+function openFromHash(push) {
+  const id = location.hash.slice(1);
+  if (BOOKS.some((b) => b.id === id)) openBook(id, 0, push);
+}
+// #picnic のような リンクで ひらいたとき：ほんだなを 下に しいてから ひらく
+{
+  const id = location.hash.slice(1);
+  if (id) {
+    history.replaceState(null, "", location.pathname);
+    if (BOOKS.some((b) => b.id === id)) openBook(id, 0, true);
+  }
+}
+</script>
+</body>
+</html>
