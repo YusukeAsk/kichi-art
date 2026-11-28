@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIアート｜アトリエ｜kichi.page</title>
+<meta name="description" content="AIと一緒に描いた絵と映像のギャラリー。光の粒が銀河、クラゲ、バラ、蝶へと姿を変え続ける映像など。">
+<meta property="og:image" content="/ai/hikari/card.jpg">
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #f3efe8; --wall: #fbf9f5; --ink: #2a2622; --sub: #8a8075; --line: #e2dbd0;
+    --dim: #0e0d0c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161413; --wall: #1f1c1a; --ink: #ede6dc; --sub: #a39889; --line: #36302b; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+    line-height: 2;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .wrap {
+    max-width: 1160px; margin: 0 auto;
+    padding: 56px max(16px, env(safe-area-inset-right)) 96px max(16px, env(safe-area-inset-left));
+  }
+
+  .back { font-size: 13px; color: var(--sub); text-decoration: none; letter-spacing: .1em; }
+  .back:hover { color: var(--ink); }
+  header { margin-top: 40px; text-align: center; }
+  .eyebrow { font-size: 12px; letter-spacing: .5em; color: var(--sub); }
+  h1 { margin-top: 6px; font-size: 44px; font-weight: 500; line-height: 1.3; letter-spacing: .12em; }
+  .intro { margin: 28px auto 0; max-width: 30em; font-size: 15px; color: var(--sub); }
+
+  /* 作品 */
+  .work { margin-top: 120px; text-align: center; }
+  .screen {
+    position: relative; margin: 0 auto; width: min(94vw, 760px);
+    background: var(--dim);
+    box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 24px 60px rgba(0,0,0,.22);
+  }
+  .screen video { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  .controls { margin-top: 18px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .controls button {
+    padding: 2px 16px; font-size: 13px; letter-spacing: .15em;
+    border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  }
+  .controls button:hover { color: var(--sub); border-color: var(--sub); }
+  .controls button:focus-visible { outline: 2px solid var(--sub); outline-offset: 4px; }
+
+  .work h2 { margin-top: 40px; font-size: 28px; font-weight: 500; letter-spacing: .25em; padding-left: .25em; }
+  .desc { margin: 18px auto 0; max-width: 27em; text-align: left; font-size: 16px; line-height: 2.2; }
+  .note { margin: 14px auto 0; max-width: 34em; font-size: 12px; color: var(--sub); letter-spacing: .06em; }
+
+  footer { margin-top: 140px; text-align: center; font-size: 12px; color: var(--sub); line-height: 2; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="back" href="/">← アトリエ</a>
+
+  <header>
+    <p class="eyebrow">AI ART</p>
+    <h1>AIアート</h1>
+    <p class="intro">AIと一緒に描いた絵と映像を、ここに並べていきます。</p>
+  </header>
+
+  <section class="work" id="hikari">
+    <div class="screen">
+      <video id="v-hikari" src="/ai/hikari/hikari.mp4" poster="/ai/hikari/poster.jpg" width="1080" height="1080"
+             muted loop playsinline preload="metadata"
+             aria-label="光の粒が、渦巻銀河、クラゲ、バラ、青い蝶へと順に姿を変え、また銀河に戻る映像。"></video>
+    </div>
+    <div class="controls">
+      <button type="button" data-play="v-hikari">止める</button>
+      <button type="button" data-sound="v-hikari">音を出す</button>
+    </div>
+    <h2>光の粒</h2>
+    <p class="desc">
+      260万の光の粒が、銀河になり、クラゲになり、バラになり、蝶になって、また銀河へ戻ります。
+      ほどけては集まり、終わりのないまま、めぐり続けます。
+    </p>
+    <p class="note">20秒でひとめぐり。粒の位置はすべて数式で決めていて、同じ粒が4つの姿をつくります。</p>
+  </section>
+
+  <footer>
+    <p><a href="/">アトリエへもどる</a></p>
+  </footer>
+
+</div>
+<script>
+(function () {
+  "use strict";
+  var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("video").forEach(function (v) {
+    var playBtn = document.querySelector('[data-play="' + v.id + '"]');
+    var soundBtn = document.querySelector('[data-sound="' + v.id + '"]');
+    var wanted = !calm;          // 見る人が「止める」を押したら、勝手には再生しない
+    function label() {
+      playBtn.textContent = v.paused ? "再生する" : "止める";
+      soundBtn.textContent = v.muted ? "音を出す" : "音を消す";
+    }
+    function play() { var p = v.play(); if (p && p.catch) p.catch(function () { label(); }); }
+    playBtn.addEventListener("click", function () { wanted = v.paused; if (v.paused) play(); else v.pause(); });
+    soundBtn.addEventListener("click", function () { v.muted = !v.muted; if (!v.muted && v.paused) { wanted = true; play(); } label(); });
+    v.addEventListener("play", label); v.addEventListener("pause", label);
+    // 画面に入ったら動かし、外れたら止める
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { if (wanted) play(); } else v.pause(); });
+      }, { threshold: 0.35 }).observe(v);
+    } else if (wanted) play();
+    label();
+  });
+})();
+</script>
+</body>
+</html>
